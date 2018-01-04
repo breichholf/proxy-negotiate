@@ -69,7 +69,7 @@ class NegotiateProxy(StreamServer):
                 break
                 
         if sys.platform == "win32":
-            status, ctx = winkerberos.authGSSClientInit('HTTP/%s' % self.upstream[0], gssflags=0, mech_oid=kerberos.GSS_MECH_OID_KRB5)
+            status, ctx = winkerberos.authGSSClientInit('HTTP/%s' % self.upstream[0], gssflags=0, mech_oid=winkerberos.GSS_MECH_OID_KRB5)
             status = winkerberos.authGSSClientStep(ctx, "")
             b64token = winkerberos.authGSSClientResponse(ctx)
         else:
@@ -116,7 +116,7 @@ def netcat(host, port, proxy_host, proxy_port):
 
     if b'200 Connection established' not in data and b'407' in data:
         if sys.platform == "win32":
-            status, ctx = winkerberos.authGSSClientInit('HTTP/%s' % proxy_host, gssflags=0, mech_oid=kerberos.GSS_MECH_OID_KRB5)
+            status, ctx = winkerberos.authGSSClientInit('HTTP/%s' % proxy_host, gssflags=0, mech_oid=winkerberos.GSS_MECH_OID_KRB5)
             status = winkerberos.authGSSClientStep(ctx, "")
             b64token = winkerberos.authGSSClientResponse(ctx)
         else:
