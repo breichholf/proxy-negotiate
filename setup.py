@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='Proxy-Negotiate',
+    name='proxy-negotiate',
     author='Brian Reichholf',
     author_email='brian.reichholf@gmail.com',
     url='https://github.com/breichholf/proxy-negotiate',
