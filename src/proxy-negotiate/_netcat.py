@@ -1,3 +1,4 @@
+import sys
 import logging
 import argparse
 import gevent
@@ -96,4 +97,7 @@ def main():
     host, port = urlparse(args.target).host, urlparse(args.target).port
     proxy_host, proxy_port = urlparse(args.proxy).host, urlparse(args.proxy).port
 
-    netcat(host, port, proxy_host, proxy_port, args.verbose)
+    try:
+        netcat(host, port, proxy_host, proxy_port, args.verbose)
+    except KeyboardInterrupt:
+        sys.exit("Closing down")
