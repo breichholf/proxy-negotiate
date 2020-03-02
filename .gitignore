@@ -3,6 +3,6 @@
 *.idea
 build/*
 dist/*
-src/proxy-negotiate.egg-info
-src/proxy-negotiate/__pycache__
-src/proxy-negotiate/_version.py
+src/proxy_negotiate.egg-info
+src/proxy_negotiate/__pycache__
+src/proxy_negotiate/_version.py

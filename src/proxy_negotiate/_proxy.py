@@ -89,6 +89,6 @@ def main():
         proxy.serve_forever()
     except KeyboardInterrupt:
         # Ctrl-C to end the proxy server gracefully
-        if not proxy.closed():
+        if not proxy.closed:
             proxy.close()
         sys.exit('Closing Proxy server.')
