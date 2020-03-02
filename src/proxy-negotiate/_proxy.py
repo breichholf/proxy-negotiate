@@ -85,4 +85,10 @@ def main():
                   f"{args.host}:{args.port}->{proxy_host}:{proxy_port}\n"))
     proxy = NegotiateProxy((args.host, args.port), (proxy_host, proxy_port),
                            verbose=args.verbose)
-    proxy.serve_forever()
+    try:
+        proxy.serve_forever()
+    except KeyboardInterrupt:
+        # Ctrl-C to end the proxy server gracefully
+        if not proxy.closed():
+            proxy.close()
+        sys.exit('Closing Proxy server.')
