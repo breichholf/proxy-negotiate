@@ -1,8 +1,10 @@
 # Proxy-Negotiate
 
+
 [![MIT license](http://img.shields.io/badge/license-MIT-yellowgreen.svg)](http://opensource.org/licenses/MIT)
 
-**This has been completely rewritten as of version 1.0.0.**
+**Refactored to provide functionality for windows and include best-practice
+`setuptools`.**
 
 A thin transparent proxy that handles kerberos-based Proxy authentification,
 for applications that cannot do that themselves. Most notably, this is
@@ -12,23 +14,22 @@ kerberos/GSSAPI/SPNEGO authentication.
 
 ## Requirements
 
-
 * `winkerberos` (for Windows/Kerberos authentication)
 * `gevent`
 
 
 ## Installation
 
-Install the easy way through PyPi:
+To install this forked repo with pip, you use the following command:
 
-```
-$ pip install proxy-negotiate
+```bash
+$ pip install git+https://github.com/breichholf/proxy-negotiate
 ```
 
-Or alternatively download and build yourself:
+Or alternatively download and build it yourself:
 
-```
-$ git clone https://github.com/cour4g3/proxy-negotiate
+```bash
+$ git clone https://github.com/breichholf/proxy-negotiate
 $ cd proxy-negotiate
 $ python setup.py install
 ```
@@ -36,44 +37,44 @@ $ python setup.py install
 # Usage
 You will need to be a member of a domain for Negotiate authentication to work.
 On Windows, you will need to be running a Kerberos ticket manager. Authentication
-should be handled transparently from there on out. 
+should be handled transparently from there on out.
 
 ## proxy-negotiate
 While running, this provides a transparent proxy from `listen_host` (usually
-`localhost`, but any local IP could make sense) and `listen_port` (default:
-`8080`). You can then use `http://localhost:8080` as proxy for your desired
-application.
+`localhost`/`127.0.0.1`, but if you have multiple IP addresses any local IP
+could make sense) and `listen_port` (default: `8080`).
+You can then use `http://localhost:8080` as proxy for your desired application.
 
 ```
-$ proxy-negotiate proxy_host proxy_port [listen_host:127.0.0.1] [listen_port:8080]
+$ proxy-negotiate PROXY_HOST:PROXY_PORT [listen_host:127.0.0.1] [listen_port:8080]
 ```
 
 Using proxy in `requests`:
 
 ```python
 import requests
-proxy = dict(http="http://127.0.0.1:8080",
+PROXY = dict(http="http://127.0.0.1:8080",
              https="http://127.0.0.1:8080")
-r = requests.get("http://www.example.org", proxies=proxy)
+r = requests.get("http://www.example.org", proxies=PROXY)
 ``` 
 
 ## nc-negotiate
-A netcat-like implementation for use with programs such as SSH and Telnet:
+A `netcat`-like implementation for use with programs such as SSH and Telnet:
 
-```
-$ nc-negotiate host port [proxy_host] [proxy_port]
-```
-
-Example of usage with OpenSSH command line:
-
-```
-$ ssh -o ProxyCommand="nc-negotiate %h %p" myexternalhost.com
+```bash
+$ nc-negotiate HOST:PORT [PROXY_HOST:PROXY_PORT]
 ```
 
-Or in your `~/.ssh/config`:
+Moreover, `nc-negotiate` can now be used as `ProxyCommand` with OpenSSH and others.
+
+```bash
+$ ssh -o ProxyCommand="nc-negotiate %h:%p" myexternalhost.com
+```
+
+This can also be added to your `~/.ssh/config` to provide the functionality on
+a per host basis:
 
 ```
   Host myexternalhost.com:
-      ProxyCommand nc-negotiate %h %p
+      ProxyCommand nc-negotiate %h:%p
 ```
-
