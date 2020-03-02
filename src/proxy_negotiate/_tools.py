@@ -10,7 +10,7 @@ from gevent.socket import wait_read
 
 
 if sys.platform == "win32":
-    import winkerbers as kerberos
+    import winkerberos as kerberos
 else:
     import gssapi
     import fcntl
