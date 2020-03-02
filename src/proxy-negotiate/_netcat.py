@@ -5,9 +5,8 @@ import gevent
 from urllib.parse import urlparse
 from gevent.socket import create_connection
 
-from ._tools import LOG_LEVEL, get_krb_token,\
-    nc_forward_stdin, nc_forward_stdout,\
-    proxy_host_from_env, proxy_port_from_env
+from ._tools import (LOG_LEVEL, nc_forward_stdin, nc_forward_stdout,
+                     get_krb_token, proxy_host_from_env, proxy_port_from_env)
 
 
 def netcat(host, port, proxy_host, proxy_port, verbose):
