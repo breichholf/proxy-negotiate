@@ -18,15 +18,36 @@ from gevent.socket import create_connection, wait_read
 logger = getLogger(__name__)
 
 
-def forward(src, dst):
+def forward(src, dst, server):
     try:
-        while True:
+        source_address = '%s:%s' % src.getpeername()[:2]
+        dest_address = '%s:%s' % dst.getpeername()[:2]
+    except socket.error as e:
+        # We could be racing signals that close the server
+        # and hence a socket.
+        log("Failed to get all peer names: %s", e)
+        return
+
+    while True:
+        try:
             data = src.recv(1024)
+            log('%s->%s', source_address, dest_address)
             if not data:
                 break
             dst.sendall(data)
-    finally:
-        src.close()
+        except KeyboardInterrupt:
+            # On Windows, a Ctrl-C signal (sent by a program) usually winds
+            # up here, not in the installed signal handler.
+            if not server.closed:
+                server.close()
+            break
+        except socket.error:
+            log('Socket error. Closing connection %s->%s',
+                source_address,
+                dest_address)
+            if not server.closed:
+                server.close()
+            break
 
 
 def forward_stdin(sock):
@@ -93,10 +114,17 @@ class NegotiateProxy(StreamServer):
         dst = create_connection(self.upstream)
         dst.sendall(b'\r\n'.join(headers) + b'\r\n\r\n' + data)
 
-        forwarders = (gevent.spawn(forward, src, dst),
-                      gevent.spawn(forward, dst, src))
+        forwarders = (gevent.spawn(forward, src, dst, self),
+                      gevent.spawn(forward, dst, src, self))
 
         gevent.joinall(forwarders)
+
+    def close(self):
+        if self.closed:
+            sys.exit('Multiple exit signals received - aborting.')
+        else:
+            log('Closing listener socket')
+            StreamServer.close(self)
 
 
 def netcat(host, port, proxy_host, proxy_port):
