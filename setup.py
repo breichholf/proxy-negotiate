@@ -11,7 +11,7 @@ from setuptools import setup, find_packages
 
 
 setup(
-    name='proxy-negotiate',
+    name='proxy_negotiate',
     author='Brian Reichholf',
     author_email='brian.reichholf@gmail.com',
     url='https://github.com/breichholf/proxy-negotiate',
@@ -22,7 +22,7 @@ setup(
         'winkerberos; sys_platform == "win32"',
     ],
     use_scm_version={
-        'write_to': 'src/proxy-negotiate/_version.py',
+        'write_to': 'src/proxy_negotiate/_version.py',
         'write_to_template': '__version__ = "{version}"',
         'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
     },

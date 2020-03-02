@@ -1,4 +1,4 @@
-"""proxy-negotiate
+"""proxy_negotiate
 Thin transparent proxy, for apps that don't support Authentication via
 Proxy Negotiation
 """
