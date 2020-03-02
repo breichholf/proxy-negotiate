@@ -5,6 +5,7 @@ import socket
 import logging
 
 from urllib.parse import urlparse
+
 from gevent.socket import wait_read
 
 
@@ -25,13 +26,13 @@ def proxy_forward(src, dst, server):
     except socket.error as e:
         # We could be racing signals that close the server
         # and hence a socket.
-        simple_log("Failed to get all peer names: %s", e)
+        logging.debug("Failed to get all peer names: %s", e)
         return
 
     while True:
         try:
             data = src.recv(1024)
-            simple_log('%s->%s', source_address, dest_address)
+            logging.info('%s->%s', source_address, dest_address)
             if not data:
                 break
             dst.sendall(data)
@@ -42,9 +43,9 @@ def proxy_forward(src, dst, server):
                 server.close()
             break
         except socket.error:
-            simple_log('Socket error. Closing connection %s->%s',
-                       source_address,
-                       dest_address)
+            logging.info('Socket error. Closing connection %s->%s',
+                         source_address,
+                         dest_address)
             if not server.closed:
                 server.close()
             break
