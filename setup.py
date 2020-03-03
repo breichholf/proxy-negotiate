@@ -26,7 +26,7 @@ setup(
         'write_to_template': '__version__ = "{version}"',
         'tag_regex': r'^(?P<prefix>v)?(?P<version>[^\+]+)(?P<suffix>.*)?$',
     },
-    python_requires='>3.7',
+    python_requires='>=3.5',
     entry_points={
         'console_scripts': [
             'nc-negotiate = proxy_negotiate._netcat:main',

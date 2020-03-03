@@ -6,6 +6,7 @@ __author__ = "Brian Reichholf"
 __email__ = "brian.reichholf@gmail.com"
 
 import logging
+
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 from ._proxy import NegotiateProxy

@@ -22,8 +22,8 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
         verbose = 2
     logger.setLevel(LOG_LEVEL[verbose])
     request = bytearray(
-        f'CONNECT {host}:{port} HTTP/1.1'.encode() +
-        b'\r\n' + f'Host: {host}:{port}'.encode() +
+        b'CONNECT %b:%d HTTP/1.1' % (host.encode(), port) +
+        b'\r\n' + b'Host: %b:%d' % (proxy_host.encode(), proxy_port) +
         b'\r\n' + b'Proxy-Connection: Keep-Alive'
     )
 
@@ -32,14 +32,14 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
 
     data = bytearray()
     while True:
-        data += dst.recv(1024)
+        data.extend(dst.recv(1024))
         if b'\r\n\r\n' in data:
             break
 
     if b'200 Connection established' not in data and b'407' in data:
         krb_token = get_krb_token(proxy_host)
-        request.extend(b'\r\n' +
-                       f'Proxy-Authorization: Negotiate {krb_token}'.encode())
+        request.extend(b'\r\n' + b'Proxy-Authorization: Negotiate %b' %
+                       krb_token)
 
         try:
             dst.sendall(request)
@@ -51,7 +51,7 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
 
         data = bytearray()
         while True:
-            data += dst.recv(1024)
+            data.extend(dst.recv(1024))
             if b'\r\n\r\n' in data:
                 break
 
@@ -75,7 +75,7 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
 
 
 def main():
-    default_proxy = f"{proxy_host_from_env()}:{proxy_port_from_env()}"
+    default_proxy = "%s:%d".format(proxy_host_from_env(), proxy_port_from_env())
 
     parser = argparse.ArgumentParser(
         description='A thin netcat-like implementation that handles Proxy '

@@ -12,7 +12,7 @@ from ._tools import proxy_forward, get_krb_token, LOG_LEVEL
 
 class NegotiateProxy(StreamServer):
 
-    def __init__(self, listener, upstream, verbose: int=0, **kwargs):
+    def __init__(self, listener, upstream, verbose: int = 0, **kwargs):
         super().__init__(listener, **kwargs)
         self.upstream = upstream
         self.logger = logging.getLogger()
@@ -29,23 +29,21 @@ class NegotiateProxy(StreamServer):
     def handle(self, src, addr):
         data = bytearray()
         while True:
-            data += src.recv(1024)
+            data.extend(src.recv(1024))
             if b'\r\n\r\n' in data:
                 break
 
-        logging.info(f'{addr[0]}:{addr[1]} accepted')
+        logging.info('%s:%d accepted', addr[0], addr[1])
 
         krb_token = get_krb_token(self.upstream[0])
 
         header, data = data.split(b'\r\n\r\n', 1)
-        header = (
-            header.extend(bytearray(
-                f'\r\nProxy-Authorization: Negotiate {krb_token}'.encode())
-            ) if header.find(b'Proxy-Authorization:') == -1
-            else re.sub(b"^Proxy-Authorization: [\S ]+$",
-                        f'Proxy-Authorization: Negotiate {krb_token}'.encode(),
-                        header)
-        )
+        auth_msg = b'Proxy-Authorization: Negotiate %b' % krb_token
+
+        if header.find(b'Proxy-Authorization:') == -1:
+            header.extend(b'\r\n' + auth_msg)
+        else:
+            header = re.sub(b'^Proxy-Authorization: [\S ]+$', auth_msg, header)
 
         dst = create_connection(self.upstream)
         dst.sendall(header + b'\r\n\r\n' + data)
@@ -80,7 +78,8 @@ def main():
 
     proxy_host, proxy_port = args.proxy.split(':')
     print(''.join("Initiating proxy. Listening and forwarding on:\n"
-                  f"{args.host}:{args.port}->{proxy_host}:{proxy_port}\n"))
+                  "{}:{}->{}:{}\n".format(args.host, args.port,
+                                          proxy_host, proxy_port)))
     proxy = NegotiateProxy((args.host, args.port), (proxy_host, proxy_port),
                            verbose=args.verbose)
     try:

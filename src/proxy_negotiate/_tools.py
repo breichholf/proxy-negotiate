@@ -8,13 +8,11 @@ from urllib.parse import urlparse
 
 from gevent.socket import wait_read
 
-
 if sys.platform == "win32":
     import winkerberos as kerberos
 else:
     import gssapi
     import fcntl
-
 
 LOG_LEVEL = {0: logging.NOTSET, 1: logging.INFO, 2: logging.DEBUG}
 
@@ -44,8 +42,7 @@ def proxy_forward(src, dst, server):
             break
         except socket.error:
             logging.info('Socket error. Closing connection %s->%s',
-                         source_address,
-                         dest_address)
+                         source_address, dest_address)
             if not server.closed:
                 server.close()
             break
@@ -86,11 +83,11 @@ def get_krb_token(host):
         # previously used with parameters `gssflags=0` and
         # `mech_oid=kerberos.GSS_MECH_OID_KRB5`
         # neither are required.
-        status, ctx = kerberos.authGSSClientInit(f'HTTP/{host}')
+        status, ctx = kerberos.authGSSClientInit('HTTP/{}'.format(host))
         _ = kerberos.authGSSClientStep(ctx, '')
-        krb_token = kerberos.authGSSClientResponse(ctx)
+        krb_token = kerberos.authGSSClientResponse(ctx).encode()
     else:
-        service = gssapi.Name(f'HTTP@{host}',
+        service = gssapi.Name('HTTP@{}'.format(host),
                               gssapi.NameType.hostbased_service)
         ctx = gssapi.SecurityContext(name=service, usage='initiate')
         token = ctx.step()
