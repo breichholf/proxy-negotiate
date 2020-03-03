@@ -76,7 +76,7 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
 
 
 def main():
-    default_proxy = "%s:%d".format(proxy_host_from_env(), proxy_port_from_env())
+    default_proxy = "{}:{}".format(proxy_host_from_env(), proxy_port_from_env())
 
     parser = argparse.ArgumentParser(
         description='A thin netcat-like implementation that handles Proxy '
