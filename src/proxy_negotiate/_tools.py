@@ -14,7 +14,7 @@ else:
     import gssapi
     import fcntl
 
-LOG_LEVEL = {0: logging.NOTSET, 1: logging.INFO, 2: logging.DEBUG}
+LOG_LEVEL = {0: logging.NOTSET, 1: logging.DEBUG}
 
 
 def proxy_forward(src, dst, server):
@@ -30,7 +30,7 @@ def proxy_forward(src, dst, server):
     while True:
         try:
             data = src.recv(1024)
-            logging.info('%s->%s', source_address, dest_address)
+            logging.debug('%s->%s', source_address, dest_address)
             if not data:
                 break
             dst.sendall(data)
@@ -41,8 +41,8 @@ def proxy_forward(src, dst, server):
                 server.close()
             break
         except socket.error:
-            logging.info('Socket error. Closing connection %s->%s',
-                         source_address, dest_address)
+            logging.debug('Socket error. Closing connection %s->%s',
+                          source_address, dest_address)
             if not server.closed:
                 server.close()
             break

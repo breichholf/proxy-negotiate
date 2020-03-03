@@ -15,16 +15,17 @@ class NegotiateProxy(StreamServer):
     def __init__(self, listener, upstream, verbose: int = 0, **kwargs):
         super().__init__(listener, **kwargs)
         self.upstream = upstream
+
         self.logger = logging.getLogger()
         handler = logging.StreamHandler()
         formatter = logging.Formatter('%(asctime)s %(levelname)-8s %(message)s')
         handler.setFormatter(formatter)
         self.logger.addHandler(handler)
-        if verbose < 0:
-            verbose = 0
-        elif verbose > 2:
-            verbose = 2
-        self.logger.setLevel(LOG_LEVEL[verbose])
+        verbose = 0 if verbose <= 0 else 1
+        if verbose:
+            self.logger.setLevel(LOG_LEVEL[verbose])
+        else:
+            logging.disable(LOG_LEVEL[0])
 
     def handle(self, src, addr):
         data = bytearray()
@@ -33,7 +34,7 @@ class NegotiateProxy(StreamServer):
             if b'\r\n\r\n' in data:
                 break
 
-        logging.info('%s:%d accepted', addr[0], addr[1])
+        logging.debug('%s:%d accepted', addr[0], addr[1])
 
         krb_token = get_krb_token(self.upstream[0])
 
@@ -57,7 +58,7 @@ class NegotiateProxy(StreamServer):
         if self.closed:
             sys.exit('Multiple exit signals received - aborting.')
         else:
-            logging.info('Closing listener socket')
+            logging.debug('Closing listener socket')
             StreamServer.close(self)
 
 

@@ -16,11 +16,12 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    if verbose < 0:
-        verbose = 0
-    elif verbose > 2:
-        verbose = 2
-    logger.setLevel(LOG_LEVEL[verbose])
+    verbose = 0 if verbose <= 0 else 1
+    if verbose:
+        logger.setLevel(LOG_LEVEL[verbose])
+    else:
+        logging.disable(LOG_LEVEL[0])
+
     request = bytearray(
         b'CONNECT %b:%d HTTP/1.1' % (host.encode(), port) +
         b'\r\n' + b'Host: %b:%d' % (proxy_host.encode(), proxy_port) +
