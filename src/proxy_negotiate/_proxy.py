@@ -37,18 +37,18 @@ class NegotiateProxy(StreamServer):
 
         krb_token = get_krb_token(self.upstream[0])
 
-        headers, data = data.split(b'\r\n\r\n', 1)
-        headers = (
-            headers.extend(bytearray(
+        header, data = data.split(b'\r\n\r\n', 1)
+        header = (
+            header.extend(bytearray(
                 f'\r\nProxy-Authorization: Negotiate {krb_token}'.encode())
-            ) if headers.find(b'Proxy-Authorization:') == -1
+            ) if header.find(b'Proxy-Authorization:') == -1
             else re.sub(b"^Proxy-Authorization: [\S ]+$",
                         f'Proxy-Authorization: Negotiate {krb_token}'.encode(),
-                        headers)
+                        header)
         )
 
         dst = create_connection(self.upstream)
-        dst.sendall(headers + b'\r\n\r\n' + data)
+        dst.sendall(header + b'\r\n\r\n' + data)
 
         forwarders = (gevent.spawn(proxy_forward, src, dst, self),
                       gevent.spawn(proxy_forward, dst, src, self))

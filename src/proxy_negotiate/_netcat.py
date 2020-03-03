@@ -78,7 +78,7 @@ def main():
     default_proxy = f"{proxy_host_from_env()}:{proxy_port_from_env()}"
 
     parser = argparse.ArgumentParser(
-        description='A thin netcat implementation that handles Proxy '
+        description='A thin netcat-like implementation that handles Proxy '
                     'Authentication for applications that cannot do so on their'
                     'own.')
     parser.add_argument('host', metavar='TARGET:PORT',
