@@ -1,3 +1,4 @@
+import re
 import sys
 import logging
 import argparse
@@ -37,20 +38,17 @@ class NegotiateProxy(StreamServer):
         krb_token = get_krb_token(self.upstream[0])
 
         headers, data = data.split(b'\r\n\r\n', 1)
-        headers = headers.split(b'\r\n')
-
-        replaced = False
-        for i, header in enumerate(headers):
-            if header.startswith(b'Proxy-Authorization:'):
-                headers[i] = f'Proxy-Authorization: Negotiate {krb_token}'.encode()
-                replaced = True
-                break
-
-        if not replaced:
-            headers.append(f'Proxy-Authorization: Negotiate {krb_token}'.encode())
+        headers = (
+            headers.extend(bytearray(
+                f'\r\nProxy-Authorization: Negotiate {krb_token}'.encode())
+            ) if headers.find(b'Proxy-Authorization:') == -1
+            else re.sub(b"^Proxy-Authorization: [\S ]+$",
+                        f'Proxy-Authorization: Negotiate {krb_token}'.encode(),
+                        headers)
+        )
 
         dst = create_connection(self.upstream)
-        dst.sendall(b'\r\n'.join(headers) + b'\r\n\r\n' + data)
+        dst.sendall(headers + b'\r\n\r\n' + data)
 
         forwarders = (gevent.spawn(proxy_forward, src, dst, self),
                       gevent.spawn(proxy_forward, dst, src, self))

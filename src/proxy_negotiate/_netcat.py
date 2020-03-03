@@ -21,15 +21,14 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
     elif verbose > 2:
         verbose = 2
     logger.setLevel(LOG_LEVEL[verbose])
-    request = [
-        f'CONNECT {host}:{port} HTTP/1.1'.encode(),
-        f'Host: {host}:{port}'.encode(),
-        b'Proxy-Connection: Keep-Alive',
-        b'\r\n',
-    ]
+    request = bytearray(
+        f'CONNECT {host}:{port} HTTP/1.1'.encode() +
+        b'\r\n' + f'Host: {host}:{port}'.encode() +
+        b'\r\n' + b'Proxy-Connection: Keep-Alive'
+    )
 
     dst = create_connection((proxy_host, proxy_port))
-    dst.sendall(b'\r\n'.join(request))
+    dst.sendall(request)
 
     data = bytearray()
     while True:
@@ -39,17 +38,16 @@ def netcat(host, port, proxy_host, proxy_port, verbose):
 
     if b'200 Connection established' not in data and b'407' in data:
         krb_token = get_krb_token(proxy_host)
-        request[-1] = f'Proxy-Authorization: Negotiate {krb_token}'.encode()
-
-        request.append(b'\r\n')
+        request.extend(b'\r\n' +
+                       f'Proxy-Authorization: Negotiate {krb_token}'.encode())
 
         try:
-            dst.sendall(b'\r\n'.join(request))
+            dst.sendall(request)
         except:
             # if proxy does not support Keep-Alive
             dst.close()
             dst = create_connection((proxy_host, proxy_port))
-            dst.sendall(b'\r\n'.join(request))
+            dst.sendall(request)
 
         data = bytearray()
         while True:
